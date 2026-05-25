@@ -9,6 +9,8 @@ import {
   MessageCircle,
   Users,
   User,
+  Clock,
+  Cloud,
 } from 'lucide-react-native';
 
 // Context
@@ -20,6 +22,8 @@ import PushScreen from './screens/PushScreen';
 import FeedScreen from './screens/FeedScreen';
 import RequestsScreen from './screens/RequestsScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import TimeZoneClockScreen from './screens/TimeZoneClockScreen';
+import WeatherDashboardScreen from './screens/WeatherDashboardScreen';
 
 // Theme colors
 export const theme = {
@@ -152,6 +156,52 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
+const TimeZoneStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: theme.primary,
+      },
+      headerTintColor: theme.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+      cardStyle: { backgroundColor: theme.background },
+    }}
+  >
+    <Stack.Screen
+      name="TimeZoneMain"
+      component={TimeZoneClockScreen}
+      options={{ title: 'Global Clock' }}
+    />
+  </Stack.Navigator>
+);
+
+const WeatherStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: theme.primary,
+      },
+      headerTintColor: theme.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+      cardStyle: { backgroundColor: theme.background },
+    }}
+  >
+    <Stack.Screen
+      name="WeatherMain"
+      component={WeatherDashboardScreen}
+      options={{ title: 'Weather Dashboard' }}
+    />
+  </Stack.Navigator>
+);
+
 const TabNavigator = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
@@ -167,7 +217,7 @@ const TabNavigator = () => (
       tabBarActiveTintColor: theme.secondary,
       tabBarInactiveTintColor: theme.lightText,
       tabBarLabelStyle: {
-        fontSize: 11,
+        fontSize: 9,
         fontWeight: '600',
         marginTop: 4,
       },
@@ -186,6 +236,12 @@ const TabNavigator = () => (
             break;
           case 'Requests':
             icon = <Users size={size} color={color} />;
+            break;
+          case 'TimeZone':
+            icon = <Clock size={size} color={color} />;
+            break;
+          case 'Weather':
+            icon = <Cloud size={size} color={color} />;
             break;
           case 'Profile':
             icon = <User size={size} color={color} />;
@@ -214,9 +270,19 @@ const TabNavigator = () => (
       options={{ title: 'Feed' }}
     />
     <Tab.Screen
+      name="TimeZone"
+      component={TimeZoneStack}
+      options={{ title: 'Clock' }}
+    />
+    <Tab.Screen
+      name="Weather"
+      component={WeatherStack}
+      options={{ title: 'Weather' }}
+    />
+    <Tab.Screen
       name="Requests"
       component={RequestsStack}
-      options={{ title: 'Requests' }}
+      options={{ title: 'Prayer' }}
     />
     <Tab.Screen
       name="Profile"
