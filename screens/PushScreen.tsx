@@ -6,19 +6,26 @@ import {
   Text,
   ScrollView,
   Animated,
+  Alert,
 } from 'react-native';
 import { Mic, CheckCircle, Heart } from 'lucide-react-native';
 import { theme } from '../App';
+import { useApp } from '../context/AppContext';
 
 export default function PushScreen() {
+  const {
+    getCurrentBurden,
+    updateBurden,
+    user,
+    updateUser,
+    todayPrayerTime,
+    incrementTodayPrayerTime,
+  } = useApp();
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const scaleAnim = new Animated.Value(1);
 
-  const currentBurden = {
-    title: 'Family Healing',
-    description: 'Pray for wisdom and restoration',
-  };
+  const currentBurden = getCurrentBurden();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -65,20 +72,52 @@ export default function PushScreen() {
   };
 
   const handlePrayed30Min = () => {
-    console.log('Marked 30 minutes of prayer');
+    if (!currentBurden) return;
     setSeconds(1800);
     setIsRunning(false);
+    incrementTodayPrayerTime(1800);
+    if (currentBurden) {
+      updateBurden(currentBurden.id, {
+        timeSpent: currentBurden.timeSpent + 1800,
+      });
+    }
+    Alert.alert('Success', 'Marked 30 minutes of prayer! 🙏');
   };
 
   const handleVoiceNote = () => {
-    console.log('Start voice note recording');
+    Alert.alert('Voice Note', 'Voice recording feature coming soon!');
   };
 
   const handleMarkAnswered = () => {
-    console.log('Mark prayer as answered');
+    if (!currentBurden) return;
+
+    if (seconds > 0) {
+      incrementTodayPrayerTime(seconds);
+      updateBurden(currentBurden.id, {
+        timeSpent: currentBurden.timeSpent + seconds,
+        answered: true,
+      });
+      updateUser({
+        answeredPrayers: user.answeredPrayers + 1,
+      });
+    }
+
     setSeconds(0);
     setIsRunning(false);
+    Alert.alert('Praise God!', 'Prayer marked as answered! 🙌');
   };
+
+  if (!currentBurden) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>
+            No prayer burdens. Go to Home to add one.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -163,15 +202,19 @@ export default function PushScreen() {
         <Text style={styles.statsTitle}>Prayer Stats</Text>
         <View style={styles.statRow}>
           <Text style={styles.statLabel}>Today's Total:</Text>
-          <Text style={styles.statValue}>{formatTime(seconds)}</Text>
+          <Text style={styles.statValue}>
+            {formatTime(todayPrayerTime + seconds)}
+          </Text>
         </View>
         <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Prayers This Week:</Text>
-          <Text style={styles.statValue}>12</Text>
+          <Text style={styles.statLabel}>This Burden:</Text>
+          <Text style={styles.statValue}>
+            {formatTime(currentBurden.timeSpent + seconds)}
+          </Text>
         </View>
         <View style={styles.statRow}>
           <Text style={styles.statLabel}>Answered Prayers:</Text>
-          <Text style={styles.statValue}>5</Text>
+          <Text style={styles.statValue}>{user.answeredPrayers}</Text>
         </View>
       </View>
     </ScrollView>
@@ -265,7 +308,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
-    color: theme.toggleButtonActive ? theme.white : theme.primary,
+    color: (props: any) =>
+      props.toggleButtonActive ? theme.white : theme.primary,
   },
   timerStatus: {
     fontSize: 14,
@@ -321,5 +365,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: theme.primary,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: theme.lightText,
+    textAlign: 'center',
   },
 });

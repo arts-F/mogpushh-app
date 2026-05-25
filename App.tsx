@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import {
   Home,
   Heart,
@@ -10,6 +10,9 @@ import {
   Users,
   User,
 } from 'lucide-react-native';
+
+// Context
+import { AppProvider, useApp } from './context/AppContext';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -223,7 +226,17 @@ const TabNavigator = () => (
   </Tab.Navigator>
 );
 
-export default function App() {
+function RootNavigator() {
+  const { isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <TabNavigator />
@@ -231,9 +244,10 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.background,
-  },
-});
+export default function App() {
+  return (
+    <AppProvider>
+      <RootNavigator />
+    </AppProvider>
+  );
+}
